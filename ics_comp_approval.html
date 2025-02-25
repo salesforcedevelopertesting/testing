@@ -1,0 +1,387 @@
+<!--
+***************************************************************************************
+* @Name of the LWC  	: Ics_comp_approval.html
+* @Description       	: Container Component to display the new client officer layout SBO-UK
+* @Author            	: Ramya Gurram
+* @Created Date      	: 10-11-2023
+***************************************************************************************
+* @Last Modified By 		: Tushar Walse
+* @Last Modified On 		: 15-02-2025
+* @Modification description : SFP-34698
+***************************************************************************************
+-->
+
+<template>
+  <lightning-flow onstatuschange={handleStatusChange}></lightning-flow>
+  <c-ics_comp_spinner lwc:if={isLoaded}></c-ics_comp_spinner>
+  <div class="aob_card_container container ao-border-radius" lwc:if={sections}>
+
+    <template lwc:if={groupedDetails}>
+      <div class="sectionTitle" style="text-align: center;">
+        New Client Onboarding & Compliance  Opportunity Profile Summary 
+        <br />
+      </div>
+      <h4 class="style1">
+        <lightning-formatted-rich-text value={groupedDetails}></lightning-formatted-rich-text>
+      </h4>
+    </template>
+
+    <form novalidate>
+      <lightning-tabset class="tabset" active-tab-value={activeTab}>
+        <template lwc:if={sections}>
+          <template for:each={sections} for:item="section" for:index="sectionIndex">
+            <template lwc:if={section.isHiddenTemplate}>
+              <lightning-tab label={section.title} id={sectionIndex} onactive={handleActive} value={sectionIndex}
+                key={section.title}>
+                <template lwc:if={section.isHiddenTemplate}>
+                  <div class="slds-grid slds-gutters slds-wrap container display">
+                    <template lwc:if={getPrePersonalDetails}>
+                      <template lwc:if={section.isActiveTab}>
+
+                        <c-ics_comp_datatable lwc:if={section.tables} tables={section.tables}
+                          class="aob_form_input slds-col slds-m-top_small slds-small-size_1-of-1 slds-medium-size_1-of-1 slds-large-size_1-of-1">
+                        </c-ics_comp_datatable>
+
+                        <template for:each={section.fields} for:item="field" for:index="index">
+
+                          <template lwc:if={field.isLookupTemplate}>
+
+                            <div key={field.id} class={field.gridClass} lwc:if={field.isHiddenTemplate}>
+
+                              <div class="slds-grid">
+                                <input lwc:if={field.isCheckbox} class="checkBox" type="checkbox" name={field.name}
+                                  id={field.id} onchange={genericFieldChangeCheck} data-name={field.name}
+                                  data-id={field.id} />
+                                <label lwc:if={field.isCheckbox} class="slds-checkbox__label" for={field.id}>
+                                  <span class="slds-checkbox_faux"></span>
+                                  <template lwc:if={field.richformattedhelptext}>
+                                    <lightning-formatted-rich-text value={field.label}></lightning-formatted-rich-text>
+
+                                  </template>
+                                  <template lwc:else>
+                                    <span class="slds-form-element__label">{field.label}</span>
+
+                                  </template>
+                                </label>
+                              </div>
+                              <template lwc:if={field.isInput}>
+                                <div class="form-group">
+                                  <input id={field.id} placeholder="" name={field.name} type="text"
+                                    data-name={field.name} data-error={field.errorMessage}
+                                    onblur={genericFieldChangeBlur} minlength={field.minLength}
+                                    maxlength={field.maxLength} pattern={field.pattern} required={field.isRequired}
+                                    onchange={genericFieldChange}></input>
+                                  <label for={field.id}>{field.placeholder} </label>
+                                  <div class="helpTextWithoutTooltip" lwc:if={field.isHelpTextWithoutTooltip}>
+                                    {field.isHelpTextWithoutTooltipText}</div>
+                                </div>
+
+                              </template>
+                              <template lwc:if={field.isCrossCellCard}>
+                                <div class="infocomp">
+                                  <c-ics_comp_info label={field.content} product-schema-code={productschemecode}
+                                    name={field.name} dynamic-css={field.isdynamicCss}>
+                                  </c-ics_comp_info>
+                                </div>
+                              </template>
+                              <template lwc:if={field.isTextArea}>
+                                <div class="form-group">
+                                  <lightning-textarea id={field.id} name={field.name} type="text" variant="label-hidden"
+                                    value={field.defaultValue} message-when-value-missing={field.errorMesage}
+                                    data-name={field.name} data-error={field.errorMessage} minlength={field.minLength}
+                                    maxlength={field.maxLength} message-when-pattern-mismatch={field.errorMesage}
+                                    pattern={field.pattern} required={field.isRequired} onchange={genericFieldChange}>
+                                  </lightning-textarea>
+                                  <label for={field.id}>{field.placeholder}</label>
+                                </div>
+                              </template>
+                              <template lwc:if={field.isEmail}>
+                                <div class="form-group">
+                                  <input id={field.id} name={field.name} type="text" data-name={field.name}
+                                    data-error={field.errorMessage} minlength={field.minLength}
+                                    maxlength={field.maxLength} pattern={field.pattern} required={field.isRequired}
+                                    onchange={genericFieldChange}></input>
+                                  <label for={field.id}>{field.placeholder} </label>
+                                </div>
+                              </template>
+                              <template lwc:if={field.isInputreadonly}>
+                                <div class="form-group">
+                                  <input id={field.id} name={field.name} type="text" data-name={field.name}
+                                    data-error={field.errorMessage} minlength={field.minLength}
+                                    maxlength={field.maxLength} pattern={field.pattern} required={field.isRequired}
+                                    disabled onchange={genericFieldChange}></input>
+                                  <label for={field.id}>{field.placeholder} </label>
+                                </div>
+                              </template>
+                              <template lwc:if={field.isEmpty}>
+                                <hr>
+                              </template>
+                              <template lwc:if={field.isInputdefault}>
+                                <h6 class="slds-m-bottom_small textdefault d-inline-block">{field.label}</h6>
+                                <c-ics_comp_tooltip lwc:if={field.helpTxt} message={field.helpTxt}
+                                  is-rich-format-text={field.richformattedhelptext}>
+                                </c-ics_comp_tooltip>
+                              </template>
+                              <div lwc:if={field.isPercent}>
+                                <c-ics_comp_percentinput label={field.placeholder}
+                                  value={field.defaultValue} percent-name={field.name} data-name={field.name}
+                                  onchange={changeCurrencylistValue} placeholder={field.placeholder}>
+                                </c-ics_comp_percentinput>
+                              </div>
+                              <template lwc:if={field.isParentAccordian}>
+                                <div class="accordion-content" data-id={field.id}>
+                                  <header class="slds-grid justify-content-between">
+                                    <div class="accordion-content-title" data-id={field.id} onclick={accordianClick}>
+                                      <lightning-icon class="slds-m-right_large chevronright lightning-icon"
+                                        data-id={field.id} icon-name="utility:chevronright"
+                                        alternative-text="chevronright" title="chevronright"></lightning-icon>
+                                      {field.label}
+                                    </div>
+                                    <div class="slds-grid">
+                                      <template lwc:if={field.completeData}>
+                                        <span lwc:if={field.completeData}
+                                          class="primaryApplicantProperties completeClass"
+                                          data-id={field.id}>Complete</span>
+                                        <button type="button"
+                                          class="slds-button slds-button_neutral addAnother parentAddAnotherBtn"
+                                          onclick={handleAddAnother} data-id={field.id}>ADD
+                                          Another<img alt="img" src={addicon} /></button>
+                                      </template>
+                                      <template lwc:else>
+                                        <span class="primaryApplicantProperties inCompleteClass "
+                                          data-id={field.id}>Incomplete</span>
+                                        <button type="button" disabled
+                                          class="slds-button slds-button_neutral addAnother parentAddAnotherBtn"
+                                          onclick={handleAddAnother} data-id={field.id}>ADD
+                                          Another<img alt="img" src={addicon} /></button>
+                                      </template>
+                                      <img alt="img" src={deleteicon} onclick={deleteAnother} data-parent={field.parent}
+                                        data-value={field.parentControllingValue} data-id={field.id}
+                                        class="slds-m-left_large  deleteParent">
+                                    </div>
+                                  </header>
+                                  <template lwc:if={field.subAccordian}>
+                                    <div class="accordion-content-description" data-id={field.id}>
+                                      <template lwc:if={field.id}>
+                                        <c-ics_comp_parent-accordian default-data={field.overallData}
+                                          is-assets-income-check={field.isAssetsIncomeCheck}
+                                          is-check-label={field.isCheckLabel} onfieldsfill={fieldsComplete}
+                                          onfieldsfillincomplete={fieldsIncomplete} onselected={handleData}
+                                          add-id={field.id} data-id={field.id} label={field.label}
+                                          name={field.name} data-name={field.name} data-tab={activeTab} data-acc={accId}
+                                          sections={sections} screen-name={screenName} acc-id={accId}
+                                          section-name={activeTab}>
+                                        </c-ics_comp_parent-accordian>
+                                      </template>
+                                    </div>
+                                  </template>
+                                </div>
+                              </template>
+                              <div lwc:if={field.isCurrency}>
+                                <c-ics_comp_currencyinput sapfield={field.mriTable}
+                                  value={field.defaultValue} label={field.label} currency-name={field.name}
+                                  data-name={field.name} onchange={changeCurrencylistValue}
+                                  placeholder={field.placeholder}></c-ics_comp_currencyinput>
+                              </div>
+                              <div lwc:if={field.isDate}>
+                                <div class="form-group">
+                                  <input type="date" class="picker" name={field.name} id={field.id}
+                                    placeholder={field.placeholder} data-name={field.name}
+                                    onchange={genericFieldChangeDate} max={today}></input>
+                                  <label for={field.id}>{field.placeholder} </label>
+                                </div>
+                                <div class="slds-form-element__help">{field.helpText}</div>
+                              </div>
+                              <div lwc:if={field.isOutput} class="aob_form-title"> {field.label} <div
+                                  class="aob-subsection-header slds-m-top_medium">{field.pattern}</div>
+                              </div>
+                              <div lwc:if={field.isHelpText} class="row aob-helptext-wrap">
+                                <div>
+                                  <img width="18" class="aob_tooltip_icon" alt="img" src={infoIMG}>
+                                </div>
+                                <div class="col">
+                                  <span class="aob-info-text">{field.label}</span>
+                                </div>
+                              </div>
+                              <template lwc:if={field.isAddbutton}>
+                                <div class="slds-grid justify-content-end">
+                                  <span class="slds-button slds-button_neutral addbutton" onclick={handleModalOpen}
+                                    data-label={field.placeholder} data-id={field.id}
+                                    data-index={sectionIndex}>{field.label}<img alt="img" src={addicon} /></span>
+                                </div>
+                              </template>
+                              <template lwc:if={field.isaddAccordian}>
+                                <div class="slds-grid justify-content-end">
+                                  <span class="slds-button slds-button_neutral addbutton" data-id={field.id}
+                                    onclick={handlesubAccordian} data-index={sectionIndex}>{field.label}<img alt="img"
+                                      src={addicon} /></span>
+                                </div>
+                              </template>
+                              <template lwc:if={field.isTable}>
+                                <c-ics_comp_previousresidentialtable onselecteddata={selectedData}
+                                  ontotalyears={receivedYears} ongetbusinesspercent={getbusinesspercent}
+                                  keys={field.pattern} add-id={field.id} label={field.label} sections={sections}
+                                  screen-name={screenName} acc-id={accId} section-name={activeTab}>
+                                </c-ics_comp_previousresidentialtable>
+                              </template>
+                              <template lwc:if={field.isLabel}>
+                                <label class="slds-inline">
+                                  <lightning-formatted-rich-text value={field.label}></lightning-formatted-rich-text>
+                                </label>
+                                <h4 class="selectedAccountValues">{field.selectedvalue}</h4>
+                              </template>
+                              <template lwc:if={field.isLabelFont}>
+                                <label class="slds-inline">
+                                  <lightning-formatted-rich-text class="isLabelFont"
+                                    value={field.label}></lightning-formatted-rich-text>
+                                </label>
+                                <h4 class="selectedAccountValues">{field.selectedvalue}</h4>
+                              </template>
+                              <template lwc:if={field.isAccordianCount}>
+                                <div class="slds-grid aob_form_row aob_grid_sm">
+                                  <div
+                                    class="slds-grid  applicantsCountIcon align-items-center select justify-content-end">
+                                    <span class="slds-m-right_medium">
+                                      Number of Trust structures
+                                    </span>
+                                    <div class="slds-grid align-items-center">
+                                      <p onclick={removeApplicant}><img src={minusIcon} alt="minus" /></p> {count} <p
+                                        onclick={addApplicant} data-index={sectionIndex} data-id={field.id}><img
+                                          src={plusIcon} alt="plus" /></p>
+                                    </div>
+                                  </div>
+                                </div>
+                              </template>
+                              <template lwc:if={field.issubAccordian}>
+                                <c-ics_comp_parent-accordian default-data={field.overallData}
+                                  ondeleteaccordian={deleteSelfAccordianCount} add-id={field.id}
+                                  is-country-related-fields={field.isCountryRelatedFields} onselected={handleData}
+                                  delete-accordian={field.deleteAccordian} data-id={field.id}
+                                  label={field.label} data-label={field.label} name={field.name} data-name={field.name}
+                                  data-tab={activeTab} data-acc={accId} sections={sections} screen-name={screenName}
+                                  acc-id={accId} section-name={activeTab}></c-ics_comp_parent-accordian>
+                              </template>
+                              <c-ics_comp_acpicklist data-sobject={field.sfObjectAPIName}
+                                readonly-joint={field.isFieldReadonly}
+                                filter-province-values={filterProvinceValues}
+                                filter-provience-value-cr={filterProvienceValueCR} lwc:if={field.isCombobox}
+                                sapfield={field.mriTable} name={field.name}
+                                filter-sub-region-values={filterSubRegionValues}
+                                filter-sub-region-value-cr={filterSubRegionValueCr} values={field.options}
+                                missing-value-message={field.errorMessage} placeholder={field.placeholder}
+                                onblur={genericComponentChangeBlur} onchange={genericComponentChange}
+                                data-name={field.name} data-id={field.id} product-schema-code={productschemecode}
+                                value={field.defaultValue} is-help-text={field.isHelpTextWithoutTooltip}
+                                is-help-text-tooltip={field.isHelpTextWithoutTooltipText}
+                                acc-id={accId}></c-ics_comp_acpicklist>
+                              <c-ics_comp_acpicklist readonly-joint="true"
+                                filter-province-values={filterProvinceValues}
+                                filter-provience-value-cr={filterProvienceValueCR} lwc:if={field.isComboboxReadonly}
+                                sapfield={field.mriTable} name={field.name}
+                                filter-sub-region-values={filterSubRegionValues}
+                                filter-sub-region-value-cr={filterSubRegionValueCr} values={field.options}
+                                missing-value-message={field.errorMessage} placeholder={field.placeholder}
+                                onblur={genericComponentChangeBlur} onchange={genericComponentChange}
+                                data-name={field.name} data-id={field.id} product-schema-code={productschemecode}
+                                value={field.defaultValue} is-help-text={field.isHelpTextWithoutTooltip}
+                                is-help-text-tooltip={field.isHelpTextWithoutTooltipText}
+                                acc-id={accId}></c-ics_comp_acpicklist>
+                              <c-ics_comp_multi-picklist multi-select="true" data-name={field.name}
+                                data-id={field.id} placeholder={field.placeholder} lwc:if={field.isMultiselect}
+                                onselectoption={handleSelectOptionList} options={field.options}
+                                selected-values={selectedValueList} values-default={field.defaultValue}
+                                label={field.name}></c-ics_comp_multi-picklist>
+                              <c-ics_comp_multi-picklist multi-select="true" disabled="true"
+                                data-name={field.name} data-id={field.id} placeholder={field.placeholder}
+                                lwc:if={field.isMultiselectReadonly} onselectoption={handleSelectOptionList}
+                                options={field.options} selected-values={selectedValueList} label={field.name}>
+                              </c-ics_comp_multi-picklist>
+                              <div lwc:if={field.isRadio} class="aob_form_row">
+                                <h4 class="d-inline-block radiosection">{field.label}</h4>
+                                <c-ics_comp_tooltip lwc:if={field.helpTxt} message={field.helpTxt}
+                                  is-rich-format-text={field.richformattedhelptext}>
+                                </c-ics_comp_tooltip>
+                                <div class="slds-grid aob_form_row aob_grid_sm radiofield">
+                                  <template for:each={field.options} for:item="radioItem" for:index="radioIndex">
+                                    <div key={radioItem.label}
+                                      class="slds-p-right_xx-large slds-grid align-items-center">
+                                      <template lwc:if={field.isFieldReadonly}>
+                                        <input type="radio" disabled data-name={field.name} data-fieldname={field.name} data-value={radioItem.value}
+                                          data-id={field.id} data-show={field.childShowingValue} name={radioItem.nameValue}
+                                          value={field.defaultValue} onchange={genericRadioChange}>
+                                      </template>
+                                      <template lwc:else>
+                                        <input type="radio" data-name={field.name} data-fieldname={field.name} data-value={radioItem.value}
+                                          data-id={field.id} data-show={field.childShowingValue} name={radioItem.nameValue}
+                                          value={field.defaultValue} onchange={genericRadioChange}>
+                                      </template>
+                                      <label class="aob_screen-section-paragraph"
+                                        for={field.id}>{radioItem.label}</label>
+                                    </div>
+                                  </template>
+                                  <br />
+                                </div>
+                              </div>
+                              <div lwc:if={field.ispicklistWithInput}>
+                                <c-ics_comp_inputwith-flag-icon section-name={activeTab} screen-name={screenName}
+                                  sections={sections} name={field.name}
+                                  country-code-data={countryCodeData} label={field.label} required={field.isRequired}
+                                  onchange={changePicklistValue}></c-ics_comp_inputwith-flag-icon>
+                              </div>
+                              <div lwc:if={field.isConsentBox}>
+                                <div class="refertext">
+                                  <lightning-input class="consent" type="checkbox" data-name="ConsentBox"
+                                    required="true" data-id="checkbox"
+                                    message-when-unchecked="Please check this box to continue"
+                                    onchange={genericCheckboxChange}></lightning-input>
+                                  <lightning-formatted-rich-text value={field.values}></lightning-formatted-rich-text>
+                                </div>
+                              </div>
+                              <template lwc:if={field.isButton}>
+                                <div class="form-group">
+                                  <lightning-button id={field.id} disabled={field.disabled} title={field.name} label={field.name} variant="brand"
+                                  onclick={genericButtonClick} data-name={field.name} stretch class="style5"></lightning-button>
+                                </div>
+                              </template>
+
+                              <p class="aob_error_input_label shE" lwc:if={field.showError}>{field.errorMessage}</p>
+                              <p class="aob_error_input_label" lwc:if={field.showTinError}>{field.tinErrorMessage}</p>
+                              <p class="aob_error_input_label SHP" lwc:if={field.showPatternError}>
+                                {field.showPatternErrorMsg} </p>
+                              <p class="aob_error_input_label SHE" lwc:if={field.showErrorMobile}>
+                                {field.errorMessageMobile} </p>
+                              <p class="aob_error_input_label SHM" lwc:if={field.showMobileValidationError}>
+                                {label.ics_mobile_should_not_same}</p>
+                            </div>
+                          </template>
+                        </template>
+                      </template>
+                    </template>
+                  </div>
+                </template>
+              </lightning-tab>
+            </template>
+          </template>
+        </template>
+      </lightning-tabset>
+    </form>
+  </div>
+  <template lwc:if={renderFlow}>
+    <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01"
+      class="slds-modal slds-fade-in-open">
+      <div class="slds-modal__container">
+        <div class="slds-modal__content slds-p-around_medium aob_header_sub_title slds-p-top_small"
+          id="modal-content-id-1">
+          <lightning-flow  lwc:if={renderFlow}
+              flow-api-name='ICS_SendChatterPost'
+              flow-input-variables={inputVariables}
+              onstatuschange={handleStatusChange}  
+            >
+          </lightning-flow>
+        </div>
+      </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+  </template>
+
+</template>
